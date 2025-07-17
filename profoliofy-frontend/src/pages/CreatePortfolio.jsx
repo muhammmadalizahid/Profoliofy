@@ -1,13 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { User, Briefcase, Mail, Phone, MapPin, Code, Award, Globe, Heart, Palette, Sparkles, Monitor, Building, Paintbrush, Gem } from "lucide-react";
+import { debounce } from 'lodash';
+import toast from 'react-hot-toast';
 
-const designOptions = [
-  { label: "Minimal", emoji: "✨", icon: Sparkles, color: "from-slate-400 to-slate-600" },
-  { label: "Modern", emoji: "💻", icon: Monitor, color: "from-blue-400 to-blue-600" },
-  { label: "Professional", emoji: "🏢", icon: Building, color: "from-gray-400 to-gray-600" },
-  { label: "Creative", emoji: "🎨", icon: Paintbrush, color: "from-purple-400 to-pink-600" },
-  { label: "Elegant", emoji: "💎", icon: Gem, color: "from-amber-400 to-amber-600" },
-];
+const InputField = React.memo(({ 
+  icon: Icon, 
+  label, 
+  type = "text", 
+  required = false, 
+  field, 
+  placeholder, 
+  multiline = false, 
+  form,
+  handleChange 
+}) => {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !multiline) {
+      e.preventDefault();
+      const inputs = Array.from(document.querySelectorAll('input, textarea'));
+      const index = inputs.indexOf(e.target);
+      if (index < inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
+    }
+  };
+
+  return (
+    <div className="group relative">
+      <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+        <Icon className="w-4 h-4 text-cyan-400" />
+        {label}
+        {required && <span className="text-red-400">*</span>}
+      </label>
+      <div className="relative">
+        {multiline ? (
+          <textarea
+            name={field}
+            className="w-full px-4 py-3 bg-gray-900 border rounded-xl transition-all duration-300 resize-none h-24 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            value={form[field] || ''}
+            onChange={(e) => handleChange(field, e.target.value)}
+            placeholder={placeholder}
+            required={required}
+          />
+        ) : (
+          <input
+            type={type}
+            name={field}
+            onKeyDown={handleKeyDown}
+            className="w-full px-4 py-3 bg-gray-900 border rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            value={form[field] || ''}
+            onChange={(e) => handleChange(field, e.target.value)}
+            placeholder={placeholder}
+            required={required}
+          />
+        )}
+      </div>
+    </div>
+  );
+});
+
+const ProgressBar = ({ progress }) => (
+  <div className="fixed top-0 left-0 right-0 h-1 bg-gray-800 z-50">
+    <div 
+      className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500"
+      style={{ width: `${progress}%` }}
+    />
+  </div>
+);
 
 const CreatePortfolio = () => {
   const [form, setForm] = useState({
@@ -27,9 +86,28 @@ const CreatePortfolio = () => {
     motto: "",
     designStyle: []
   });
+  const [errors, setErrors] = useState({});
+  const [formProgress, setFormProgress] = useState(0);
+
+  useEffect(() => {
+    const savedForm = localStorage.getItem('portfolioForm');
+    if (savedForm) {
+      setForm(JSON.parse(savedForm));
+    }
+  }, []);
+
+  const saveFormToLocal = debounce((formData) => {
+    localStorage.setItem('portfolioForm', JSON.stringify(formData));
+  }, 500);
 
   const handleChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    const updatedForm = {
+      ...form,
+      [field]: value
+    };
+    
+    setForm(updatedForm);
+    saveFormToLocal(updatedForm);  // Pass the updated form directly
   };
 
   const handleDesignToggle = (style) => {
@@ -41,47 +119,45 @@ const CreatePortfolio = () => {
     }));
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    const requiredFields = ['name', 'profession', 'bio', 'skills', 'location', 'email'];
+    
+    requiredFields.forEach(field => {
+      if (!form[field].trim()) {
+        newErrors[field] = 'This field is required';
+      }
+    });
+
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
+
+    if (form.designStyle.length === 0) {
+      newErrors.designStyle = 'Please select at least one design style';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
     console.log("Prompt Data:", form);
   };
 
-  const InputField = ({ icon: Icon, label, type = "text", required = false, field, placeholder, multiline = false }) => (
-    <div className="group relative">
-      <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
-        <Icon className="w-4 h-4 text-cyan-400" />
-        {label}
-        {required && <span className="text-red-400">*</span>}
-      </label>
-      <div className="relative">
-        {multiline ? (
-          <textarea
-            className={`w-full px-4 py-3 bg-gray-900 border rounded-xl transition-all duration-300 resize-none h-24 focus:outline-none focus:ring-2 focus:ring-cyan-500`}
-            value={form[field]}
-            onChange={e => handleChange(field, e.target.value)}
-            placeholder={placeholder}
-            required={required}
-          />
-        ) : (
-          <input
-            type={type}
-            className={`w-full px-4 py-3 bg-gray-900 border rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500`}
-            value={form[field]}
-            onChange={e => handleChange(field, e.target.value)}
-            placeholder={placeholder}
-            required={required}
-          />
-        )}
-      </div>
-    </div>
-  );
+  
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0f2c] via-[#10193d] to-[#0a0f2c] text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#1B263B] text-white relative overflow-hidden">
       {/* Visual tweaks and fixes */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" />
-        <div className="absolute top-40 right-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700" />
-        <div className="absolute bottom-20 left-40 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000" />
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-[#415A77] rounded-full mix-blend-multiply filter blur-xl animate-pulse" />
+        <div className="absolute top-40 right-20 w-72 h-72 bg-[#243447] rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700" />
+        <div className="absolute bottom-20 left-40 w-72 h-72 bg-[#0D1B2A] rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000" />
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-10">
@@ -97,86 +173,61 @@ const CreatePortfolio = () => {
           </p>
         </div>
 
+        <ProgressBar />
+
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-12">
           {/* Personal Info Section */}
-          <section className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50">
+          <section className="bg-[#243447] bg-opacity-90 backdrop-blur-md rounded-xl shadow-2xl p-8">
             <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-3">
               <User className="w-6 h-6" /> Personal Information
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField icon={User} label="Full Name" field="name" placeholder="Your full name" required />
-              <InputField icon={Briefcase} label="Profession" field="profession" placeholder="Your profession" required />
+              <InputField 
+                icon={User} 
+                label="Full Name" 
+                field="name" 
+                placeholder="Your full name" 
+                required 
+                form={form}
+                handleChange={handleChange}
+              />
+              <InputField icon={Briefcase} label="Profession" field="profession" placeholder="Your profession" required form={form} handleChange={handleChange} />
               <div className="md:col-span-2">
-                <InputField icon={User} label="Short Bio" field="bio" placeholder="Brief bio" required multiline />
+                <InputField icon={User} label="Short Bio" field="bio" placeholder="Brief bio" required multiline form={form} handleChange={handleChange} />
               </div>
-              <InputField icon={Code} label="Skills" field="skills" placeholder="Your skills" required />
-              <InputField icon={MapPin} label="Location" field="location" placeholder="City, Country" required />
+              <InputField icon={Code} label="Skills" field="skills" placeholder="Your skills" required form={form} handleChange={handleChange} />
+              <InputField icon={MapPin} label="Location" field="location" placeholder="City, Country" required form={form} handleChange={handleChange} />
             </div>
           </section>
 
           {/* Contact Info */}
-          <section className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50">
+          <section className="bg-[#243447] bg-opacity-90 backdrop-blur-md rounded-xl shadow-2xl p-8">
             <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-3">
               <Mail className="w-6 h-6" /> Contact Information
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField icon={Mail} label="Email" type="email" field="email" placeholder="you@example.com" required />
-              <InputField icon={Phone} label="Phone" type="text" field="phone" placeholder="Phone number" />
-              <InputField icon={Globe} label="LinkedIn" type="url" field="linkedin" placeholder="LinkedIn URL" />
-              <InputField icon={Code} label="GitHub" type="url" field="github" placeholder="GitHub URL" />
+              <InputField icon={Mail} label="Email" type="email" field="email" placeholder="you@example.com" required form={form} handleChange={handleChange} />
+              <InputField icon={Phone} label="Phone" type="text" field="phone" placeholder="Phone number" form={form} handleChange={handleChange} />
+              <InputField icon={Globe} label="LinkedIn" type="url" field="linkedin" placeholder="LinkedIn URL" form={form} handleChange={handleChange} />
+              <InputField icon={Code} label="GitHub" type="url" field="github" placeholder="GitHub URL" form={form} handleChange={handleChange} />
               <div className="md:col-span-2">
-                <InputField icon={Globe} label="Other Socials" field="social" placeholder="Twitter, Instagram, etc." />
+                <InputField icon={Globe} label="Other Socials" field="social" placeholder="Twitter, Instagram, etc." form={form} handleChange={handleChange} />
               </div>
             </div>
           </section>
 
           {/* Professional Section */}
-          <section className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50">
+          <section className="bg-[#243447] bg-opacity-90 backdrop-blur-md rounded-xl shadow-2xl p-8">
             <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-3">
               <Briefcase className="w-6 h-6" /> Professional Background
             </h2>
             <div className="space-y-6">
-              <InputField icon={Award} label="Education" field="education" placeholder="Your education" multiline />
-              <InputField icon={Briefcase} label="Work Experience" field="experience" placeholder="Your experience" multiline />
-              <InputField icon={Award} label="Certifications" field="certifications" placeholder="Certifications" multiline />
-              <InputField icon={Heart} label="Personal Motto" field="motto" placeholder="Motto or philosophy" />
+              <InputField icon={Award} label="Education" field="education" placeholder="Your education" multiline form={form} handleChange={handleChange} />
+              <InputField icon={Briefcase} label="Work Experience" field="experience" placeholder="Your experience" multiline form={form} handleChange={handleChange} />
+              <InputField icon={Award} label="Certifications" field="certifications" placeholder="Certifications" multiline form={form} handleChange={handleChange} />
+              <InputField icon={Heart} label="Personal Motto" field="motto" placeholder="Motto or philosophy" form={form} handleChange={handleChange} />
             </div>
           </section>
-
-          {/* Design Style */}
-          <section className="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50">
-            <h2 className="text-2xl font-bold text-cyan-400 mb-6 flex items-center gap-3">
-              <Palette className="w-6 h-6" /> Design Style <span className="text-sm text-gray-400 font-normal">(Select multiple)</span>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {designOptions.map((option, i) => {
-                const Icon = option.icon;
-                const isSelected = form.designStyle.includes(option.label);
-
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    className={`group relative p-6 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 ${
-                      isSelected
-                        ? "border-cyan-500 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 shadow-lg shadow-cyan-500/25"
-                        : "border-gray-700 bg-gray-800/50 hover:border-gray-600 hover:bg-gray-700/50"
-                    }`}
-                    onClick={() => handleDesignToggle(option.label)}
-                  >
-                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${option.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-                    <div className="relative z-10 flex flex-col items-center gap-3">
-                      <div className={`p-3 rounded-xl ${isSelected ? "bg-cyan-500/20 text-cyan-400" : "bg-gray-700/50 text-gray-400 group-hover:bg-gray-600/50"}`}>
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <span className={`font-medium ${isSelected ? "text-cyan-400" : "text-gray-300"}`}>{option.label}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
           {/* Submit Button */}
           <div className="text-center">
             <button
