@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaGithub, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const ProfoliofyLogo = () => (
   <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -136,17 +137,19 @@ export default function AuthPages() {
 
   return (
     <AuthErrorBoundary>
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-6 py-4 sm:py-6">
+      <div className="min-h-screen bg-[#F5F5F4] flex items-center justify-center px-4 sm:px-6 py-4 sm:py-6">
         <div className="w-full max-w-md bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-          {/* Panel Header - make it more compact on mobile */}
+          {/* Panel Header - aligned to left */}
           <div className="p-4 sm:p-8 pb-0">
-            <div className="flex items-center justify-center space-x-2 sm:space-x-3 mb-4">
-              <ProfoliofyLogo />
-              <h1 className="text-2xl sm:text-3xl font-bold text-blue-900">PROFOLIOFY</h1>
+            <div className="flex flex-col items-start">
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-2">
+                <ProfoliofyLogo />
+                <h1 className="text-2xl sm:text-3xl font-bold text-blue-900">PROFOLIOFY</h1>
+              </div>
+              <h2 className="text-lg sm:text-xl text-blue-900">
+                {isLogin ? 'Welcome back' : 'Create your account'}
+              </h2>
             </div>
-            <h2 className="text-lg sm:text-xl text-blue-900 text-center mb-4 sm:mb-6">
-              {isLogin ? 'Welcome back' : 'Create your account'}
-            </h2>
           </div>
 
           {/* Form Content - adjust padding for mobile */}
@@ -248,9 +251,12 @@ export default function AuthPages() {
                     />
                     <span className="ml-2">Remember me</span>
                   </label>
-                  <a href="#" className="text-sm text-blue-900 hover:underline">
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-sm text-blue-900 hover:underline"
+                  >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
               )}
 
@@ -352,10 +358,41 @@ export default function AuthPages() {
             <div className="mt-4 sm:mt-6 text-center text-xs text-gray-500 px-2 sm:px-0">
               <p className="leading-relaxed">
                 By clicking {isLogin ? 'Sign in' : 'Sign up'}, you agree to our{' '}
-                <a href="#" className="text-blue-900 hover:underline">Privacy Policy</a> and{' '}
-                <a href="#" className="text-blue-900 hover:underline">Cookie Policy</a>.
+                <Link to="/privacy-policy" className="text-blue-900 hover:underline">
+                  Privacy Policy
+                </Link>{' '}
+                and{' '}
+                <Link to="/cookie-policy" className="text-blue-900 hover:underline">
+                  Cookie Policy
+                </Link>
+                .
               </p>
             </div>
+          </div>
+
+          {/* Floating Help Button */}
+          <div className="fixed bottom-4 right-4 z-50">
+            <button
+              onClick={() => {/* Add your help modal/popup logic here */}}
+              className="bg-blue-900 text-white rounded-full p-4 shadow-lg hover:bg-blue-800 transition-colors group flex items-center gap-2"
+            >
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth="2" 
+                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                />
+              </svg>
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+                Need Help?
+              </span>
+            </button>
           </div>
         </div>
       </div>
