@@ -46,7 +46,7 @@ const Navbar = () => {
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
           <div className="flex items-center">
-            <span className="text-xl font-bold text-gray-50">Portfoliofy</span>
+            <span className="text-xl font-bold text-gray-50">Profoliofy</span>
           </div>
         </div>
         <div className="hidden md:flex items-center space-x-8">
@@ -55,18 +55,18 @@ const Navbar = () => {
           <Link to="#pricing" className="text-gray-50 hover:text-gray-200 transition-colors">Pricing</Link>
         </div>
         <div className="flex items-center space-x-4">
-          <Link 
-            to="/auth" 
-            className="px-4 py-2 text-gray-50 hover:bg-blue-800 rounded-lg transition-colors"
-          >
-            Sign In
-          </Link>
-          <Link 
-            to="#generate" 
-            className="px-4 py-2 bg-gray-50 text-blue-900 hover:bg-gray-100 rounded-lg font-medium transition-colors"
-          >
-            Get Started
-          </Link>
+          <div className="relative group">
+            <button className="flex items-center space-x-2 focus:outline-none">
+              <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+            </button>
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+              <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Your Profile</Link>
+              <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Settings</Link>
+              <Link to="/logout" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Sign out</Link>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
@@ -80,7 +80,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           <div>
             <div className="flex items-center mb-4">
-              <span className="text-xl font-bold">Portfoliofy</span>
+              <span className="text-xl font-bold">Profoliofy</span>
             </div>
             <p className="text-sm opacity-80">
               AI-powered portfolio creation for professionals.
@@ -147,7 +147,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-blue-800 mt-12 pt-8 text-sm text-center opacity-80">
-          © {new Date().getFullYear()} Portfoliofy. All rights reserved.
+          © {new Date().getFullYear()} Profoliofy. All rights reserved.
         </div>
       </div>
     </footer>

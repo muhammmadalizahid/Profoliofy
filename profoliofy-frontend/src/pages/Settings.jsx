@@ -130,7 +130,7 @@ export default function Settings() {
   const [user, setUser] = useState({
     name: "Ali Raza",
     email: "ali@example.com",
-    password: "********",
+    password: "",
   });
   const [editMode, setEditMode] = useState(false);
 
@@ -176,7 +176,9 @@ export default function Settings() {
                   value={user.name}
                   onChange={handleChange}
                   disabled={!editMode}
-                  className={`w-full px-4 py-3 rounded-lg border ${editMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50'} focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  className={`w-full px-4 py-3 rounded-lg border ${
+                    editMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50'
+                  } focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 />
               </div>
 
@@ -188,7 +190,9 @@ export default function Settings() {
                   value={user.email}
                   onChange={handleChange}
                   disabled={!editMode}
-                  className={`w-full px-4 py-3 rounded-lg border ${editMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50'} focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  className={`w-full px-4 py-3 rounded-lg border ${
+                    editMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50'
+                  } focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 />
               </div>
 
@@ -200,11 +204,38 @@ export default function Settings() {
                   value={user.password}
                   onChange={handleChange}
                   disabled={!editMode}
-                  className={`w-full px-4 py-3 rounded-lg border ${editMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50'} focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  className={`w-full px-4 py-3 rounded-lg border ${
+                    editMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50'
+                  } focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 />
               </div>
 
-              <div className="flex flex-wrap gap-4 pt-4">
+              {/* Account Status Section */}
+              <div className="pt-6 border-t border-gray-200">
+                <h2 className="text-lg font-medium text-gray-900 mb-4">Account Status</h2>
+                <div className="bg-blue-50 rounded-lg p-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-blue-900">Free Plan</p>
+                    <p className="text-sm text-blue-700">Basic features included</p>
+                  </div>
+                  <Link
+                    to="/pricing"
+                    className="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 transition-colors"
+                  >
+                    Upgrade to Premium
+                  </Link>
+                </div>
+              </div>
+
+              {/* Payment History Section */}
+              <div className="pt-6 border-t border-gray-200">
+                <h2 className="text-lg font-medium text-gray-900 mb-4">Payment History</h2>
+                <div className="text-sm text-gray-500">
+                  No payment history available
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-200">
                 {editMode ? (
                   <>
                     <button
